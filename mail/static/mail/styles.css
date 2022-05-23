@@ -1,3 +1,21 @@
 textarea {
     min-height: 400px;
 }
+
+.sender{
+    font-weight: bold;
+
+}
+.subject{
+    margin-left: 10px;
+
+}
+.time{
+    position: absolute;
+    right: 0%;
+}
+.email{
+    position: relative;
+    display: flex;
+    border: solid;
+}
