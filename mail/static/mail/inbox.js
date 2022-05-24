@@ -120,24 +120,36 @@ function details(email,mailbox){
     timestamp.innerHTML=`Timestamp: ${data['timestamp']}`;
     div.append(timestamp);
 
-    //reply and archive button depending on mailbox the email is in
-    if(mailbox=='inbox'){
-      reply=document.createElement('button');
-      archive=document.createElement('button');
-      div.append(reply);
-      div.append(archive);
-    }
-    //Seperation line
-    div.append(document.createElement('hr'))
-    //create container with body
-    body=document.createElement('div');
-    body.innerHTML=data['body'];
-    div.append(body);
+    //no button if email is in sent mailbox
+    if(mailbox!=='sent'){
+      //reply button
+      replyButton=document.createElement('button');
+      replyButton.className="btn btn-sm btn-outline-primary";
+      replyButton.id='reply';
+      replyButton.innerHTML="Reply";
+      replyButton.onclick=reply;
+      div.append(replyButton);
 
-    //defining the button added
-    reply.className="btn btn-sm btn-outline-primary";
-    reply.innerHTML="Reply";
-    reply.onclick=()=>{
+      //archive/unarchive button
+      archiveButton=document.createElement('button');
+      archiveButton.className="btn btn-sm btn-outline-primary";
+      archiveButton.id='archive';
+      //Unarchive archived email
+      if(mailbox==='archive'){
+        archiveButton.innerHTML="Unarchive";
+        archiveButton.onclick=unarchive;
+      }
+      //message not archived
+      else{
+        archiveButton.innerHTML="Archive";
+        archiveButton.onclick=archive;
+      }
+      div.append(archiveButton);
+    }
+
+    //button functions
+    //reply
+    function reply(){
       compose_email();
       document.querySelector('#compose-recipients').value = sender.innerHTML.replace('From: ','');
       if(subject.innerHTML.indexOf('Re: ')===-1)
@@ -147,9 +159,29 @@ function details(email,mailbox){
       
       document.querySelector('#compose-body').value = `On ${timestamp.innerHTML.replace('Timestamp: ','')} ${sender.innerHTML.replace('From: ','')} wrote:\n${body.innerHTML}`;
     }
-    archive.className="btn btn-sm btn-outline-primary";
-    archive.innerHTML="Archive";
-  
+    //unarchive
+    function unarchive(){
+      fetch(`emails/${email.dataset.id}`,{
+        method:'PUT',
+        body:JSON.stringify({archived:false})
+      })
+      details(email,'inbox')
+    }
+    //archive
+    function archive(){
+      fetch(`emails/${email.dataset.id}`,{
+        method:'PUT',
+        body:JSON.stringify({archived:true})
+      })
+      details(email,'archive');
+    }
+
+    //Seperation line
+    div.append(document.createElement('hr'))
+    //create container with body
+    body=document.createElement('div');
+    body.innerHTML=data['body'];
+    div.append(body);
   })
   markRead(email);
 }
